@@ -9,29 +9,30 @@
 typedef struct {
 	Shader shader;
 	int fsColorLoc;
+	int fsTimeLoc;
 } ShaderData;
 
 ShaderData initShader(char* vsFile, char* fsFile)
 {
 	Shader shader = LoadShader(vsFile, fsFile);
 
-	int fsColorLoc = GetShaderLocationAttrib(shader, "aPos");
+	int fsColorLoc = GetShaderLocationAttrib(shader, "vertexColor");
 	// SetShaderValue(shader, fsColorLoc, (float[3]){1.0, 0.0, 0.0}, SHADER_UNIFORM_VEC3);
-	SetShaderValue(shader, fsColorLoc, (float[3]){1.0, 0.0, 0.0}, SHADER_UNIFORM_VEC3);
-	shader.locs[SHADER_LOC_VERTEX_POSITION] = fsColorLoc;
+	// SetShaderValue(shader, fsColorLoc, (float[3]){1.0, 0.0, 0.0}, SHADER_UNIFORM_VEC3);
 
-	float vertexPos[12] = {
-		100.0f, 0.0f, 0.0f,
-		500.0f, 0.0f, 0.0f,
-		500.0f, 500.0f, 0.0f,
-		100.0f, 500.0f, 0.0f,
-	};
-	SetShaderValueV(shader, fsColorLoc, vertexPos, SHADER_UNIFORM_VEC3, 4);
-
+	// float vertexPos[12] = {
+	// 	100.0f, 0.0f, 0.0f,
+	// 	500.0f, 0.0f, 0.0f,
+	// 	500.0f, 500.0f, 0.0f,
+	// 	100.0f, 500.0f, 0.0f,
+	// };
+	// SetShaderValueV(shader, fsColorLoc, vertexPos, SHADER_UNIFORM_VEC3, 4);
+	int fsTimeLoc = GetShaderLocation(shader, "time");
 
 	ShaderData shader_data = {
 		.shader = shader,
 		.fsColorLoc = fsColorLoc,
+		.fsTimeLoc = fsTimeLoc,
 	};
 	if (IsShaderValid(shader_data.shader)) {
 		printf("This shader is valid.\n");
@@ -43,12 +44,13 @@ ShaderData initShader(char* vsFile, char* fsFile)
 int main(void) {
 	InitWindow(800, 600, "Learning shaders");
 
-	char *vsPath = "shaders/vs.glsl";
+	char *vsPath = NULL; // "shaders/vs.glsl";
 	char *fsPath = "shaders/fs.glsl";
 	ShaderData shader_data = initShader(vsPath, fsPath);
 
 	int i = 100;
 	int posx = 200;
+	int tick = 0;
 
 	SetTargetFPS(75);
 	while (!WindowShouldClose()) {
@@ -61,19 +63,23 @@ int main(void) {
 		BeginDrawing();
 			BeginShaderMode(shader_data.shader);
 
-			DrawRectangle(100, 100, 400, 400, WHITE);
+			DrawRectangle(posx, 100, 400, 400, WHITE);
 
 			EndShaderMode();
 		EndDrawing();
 
 
-		// SetShaderValue(shader, timeLoc, (float[1]){i}, SHADER_UNIFORM_FLOAT);
+		SetShaderValue(shader_data.shader,
+				shader_data.fsTimeLoc,
+				(float[1]){GetTime()}, SHADER_UNIFORM_FLOAT
+			);
 
 		float dt = GetFrameTime();
 		posx += i * dt;
 		// printf("Pos x: %i (%i)\n", posx, posx + i);
 		// printf("Frame Time: %lf (%lf)\n", dt, i*dt);
 		if ((posx + 400 >= 800) || (posx < 0)) i = -i;
+		tick += 1;
 	}
 
 	return 0;
