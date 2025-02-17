@@ -7,8 +7,8 @@ uniform float time;
 
 out vec4 FragColor;
 
-vec3 colorA = vec3(0.149,0.141,0.912);
-vec3 colorB = vec3(1.000,0.833,0.224);
+vec3 colorA = vec3(0.149, 0.141, 0.912);
+vec3 colorB = vec3(1.000, 0.833, 0.224);
 
 void main() {
 	float t = abs(sin(time));
